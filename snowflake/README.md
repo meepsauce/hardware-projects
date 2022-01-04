@@ -1,0 +1,32 @@
+# Snowflake (Christmas 2021)
+
+One day I will fix this design... it is a very simple fix but I am lazy
+
+## Warning:
+This project works, but I do not reccomend replicating/making it in it's current state: it is very "hacky" and was made in a rush.
+
+## Guide:
+
+Using the supplied Gerber Files you can order the design from any manufacturer. I used JLCPCB plus their SMT service (I did not want to solder 125 LEDs by hand) and they are super cheap (plus lots of coupons). Everything, including the BOM is correct, but upon actually creating the PCB, some bodges will need to be made. I ordered my components from LCSC, and their cooresponding part numbers are in the BOM.
+
+Soldering all the components on the board is trivial but some changes needed to be made for the board to function properly:
+
+- Bodge GND to both decoupling capacitors that are located right below the shottcky diode.
+- Bodge DOUT from the top-left arm to DIN on the first neopixel on the top arm.
+
+## Story (Debugging and the tons of mistakes I made)
+It has become a tradition of mine to create christmas themed PCBs as a gift for family/friends/teachers, etc.
+
+In following years they have been quite simple: mostly because accounting for finals and my amazing procrastination skills, I have minimal time to actually complete the project in question.
+
+An example is a Christmas Tree I made last year (I will find the files eventually...),  it was designed quite sloppily but was "good enough". It consisted simply of a Arduino Nano with a battery of THT LEDs and Resistors- not particularly complex but made a cool pattern.
+
+Therefore, I wanted to naturally one-up myself and create something that utilized more technique. Thus, I arrived on the idea of a Snowflake Ornament, one that was battery powered and fully SMD. Because of the chip shortage (prices) and my familiarity with the ATtiny/ATmega family, I arrived on the Attiny84- it was cheap, simple and was capable of driving the 24 led Neopixels (4 on each arm). This is where I made my first fatal mistake however, as I assigned each arm of the snowflake (4 Neopixels) its own dedicated pin on the MCU. Not realising how little memory the Attiny84 has, this would come to bite me later...
+
+Choosing the normal Neopixels (WS2812B) was my second mistake, as they consumed 50mA each, more like 25mA if I used a low framerate and cut the color/brightness values in half. I initally planned to power this from 2 coin cell batteries in series so the prospect of pulling possibly greater than 1A was pretty scary (in every sense). I attempted to quickly solve this by changing to the C variant (which only use ~5mA)... only to learn that they were out of stock at LCSC (I was going to use JLCPCBs SMT Services as I was out of time, and did not want to solder so many LEDs manually). Therefore I arrived on a design with a estimated power draw of ~300mA with a battery capacity of 235mAh. I was low on time, so I decided to just run with it.
+
+Upon getting the PCBs from JLCPCB, they looked great, I choose the white mask and with the Snowflake Outline I thought it looked pretty cool (if anything, it was much larger than I imagined). However, a quick look showed that all boards were missing the MCU, a capacitor and the battery holders. I later learned that as I put the boards in production, the chips became out of stock, but JLCPCB still charged me for them. I was pissed but again, no time, and it was imperitive that I maintained my jolly behaviour. Therefore, I quickly ordered the missing components from Digikey, being in such a rush I ordered a slightly oversized battery case (which, as you may guess, became a PITA later)
+
+After soldering the Attiny84s with a 15 dollar soldering iron (pain), I had no problem flashing them with a Arduino Uno as ISP (though I initally frogot the capacitor between RST and GND). I used the ATTiny Core Library to upload the code, I choose the correct settings for the chip I used, and did not use a discrete bootloader to save memory (and to keep it dead simple). The pin definitons were wacky but eventually through trial and error I used the FastLED library to eventually drive all arms of the snowflake, except for the top arm, it simply would not work. Frustrated I consulted my schematic and learned that for whatever reason, I thought it was a good idea to drive Neopixels using the reset pin of the Attiny84. Now, this is possible, but doing so requires setting a fuse which forces reset as a output, but therefore disables programming by ISP. Therefore I needed a better solution, and ended up cutting the trace going from the reset pin to the leds manually with a exacto knife. Then I bodged a wire from a free digital pin from the MCU to the neopixel in question. This worked, I was able to drive the arm just fine... but that's when I realised that I neglected to consider something very important: the available memory of my MCU. Upon trying to compile code that would drive every arm of the snowflake (there was a FastLED instance for each arm) I quickly came to the realization that my code was simply too big for the Attiny84. Therefore I optimized the code to the best of my ability, switching everything to unsigned ints, removing bloat code or unnessacary calls, but the code was still too big (by ~800 bytes). Therefore, seeing my mistake, my solution was actually fairly simple and worked to ease the hacky soldering of the board. I made a bodge that went from the top-left arm to the top one, then in software I doubled the amount of pins that arm was supposed to drive. This change left me using ~96% of system memory, which warned me of instability but I never encountered any problems in operation.
+
+All that was left was power... I realised quickly that I made two big mistakes: the decoupling capacitors were not connected to ground (I honestly have not clue how I overlooked this) and the battery cases I ordered were one size too big. On my first board, I bodged the capacitors to ground, but later learned that they werent required for it to work... so I just left them as is. As for the battery cases, I forced them to work, quite literally. One of them is the wrong orientation and thus the battery needs to be flipped... but it works fine. In all, I got a battery time of ~1 hour which isnt great... but lasts long enough for people to enjoy it. I make sure to remind them that it can be powered from usb (which actually works).
