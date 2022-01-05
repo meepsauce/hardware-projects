@@ -1,0 +1,9 @@
+Comment,Designator,Footprint,LCSC
+".1uF","C1","Capacitor_SMD:C_0603_1608Metric",C908553
+"10uF","C2","Capacitor_SMD:C_0603_1608Metric",C85713
+"WS2812C","D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D11,D12,D13,D14,D15,D16,D17,D18,D19,D20,D21,D22,D23,D24","LED_SMD:LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm",C139127
+"1N4001","D25","Diode_SMD:D_SMA",C433392
+"AVR-ISP-6","J1","Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical_THT",C65114
+"USB_B_Micro","J2","Connector_USB:USB_Micro-B_Molex-105017-0001",C136000
+"SW_DIP_x01","SW1","Button_Switch_SMD:SW_DIP_SPSTx01_Slide_6.7x4.1mm_W6.73mm_P2.54mm_LowProfile_JPin",C129077
+"ATtiny84-20SSU","U1","Package_SO:SOIC-14_3.9x8.7mm_P1.27mm",C144333
